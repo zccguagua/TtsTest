@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 使用 Material 3 主题，无自带的 ActionBar（标题由布局自己画） -->
+    <style name="Theme.TtsTest" parent="Theme.Material3.DayNight.NoActionBar" />
+</resources>

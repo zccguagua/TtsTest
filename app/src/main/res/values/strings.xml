@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TTS 测试</string>
+
+    <string name="hint_input">输入要朗读的文字…</string>
+    <string name="label_speed">语速</string>
+    <string name="speed_value">%1$.2f×</string>
+
+    <string name="btn_speak">朗读</string>
+    <string name="btn_stop">停止</string>
+
+    <string name="status_initializing">正在初始化语音引擎…</string>
+    <string name="status_ready">就绪</string>
+    <string name="status_speaking">正在朗读…</string>
+    <string name="status_error">朗读出错</string>
+    <string name="status_lang_unsupported">系统缺少当前语言的离线语音数据，请在「设置 → 语言和输入 → 文字转语音」中安装</string>
+    <string name="status_init_failed">语音引擎初始化失败，请检查系统是否已安装 TTS 引擎</string>
+
+    <string name="toast_empty">请先输入要朗读的文字</string>
+</resources>

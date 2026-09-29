@@ -1,0 +1,18 @@
+# IntelliJ / Android Studio 工程文件（含本机 JDK、主题、userId 等个人配置）
+*.iml
+/.idea/
+
+# Gradle
+.gradle
+/build
+
+# 本机 SDK 路径，因机器而异
+local.properties
+
+# Native
+.externalNativeBuild
+.cxx
+
+# 其他
+.DS_Store
+/captures

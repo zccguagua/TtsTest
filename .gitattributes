@@ -1,0 +1,6 @@
+# 本仓库 core.autocrlf=true，这里显式锁定关键文件的换行符。
+# gradlew 是 shell 脚本，必须是 LF，否则 Git Bash 下会因 shebang 带 \r 而无法执行。
+gradlew text eol=lf
+
+*.bat text eol=crlf
+*.jar binary
