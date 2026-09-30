@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 悬浮按钮本体：外层是圆形背景，内层是白色喇叭图标。
+     根布局用自定义 View，是为了拿到窗口焦点变化的回调。 -->
+<com.zcc.ttstest.OverlayButtonView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="56dp"
+    android:layout_height="56dp"
+    android:background="@drawable/bg_circle"
+    android:contentDescription="@string/overlay_button_desc"
+    android:elevation="6dp"
+    android:padding="15dp"
+    android:src="@drawable/ic_speaker" />

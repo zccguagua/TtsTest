@@ -1,6 +1,14 @@
 package com.zcc.ttstest
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.widget.Button
@@ -8,7 +16,9 @@ import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import java.util.Locale
 
 /**
@@ -28,6 +38,19 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var tvStatus: TextView
     private lateinit var btnSpeak: Button
     private lateinit var btnStop: Button
+    private lateinit var btnOverlay: Button
+    private lateinit var tvOverlayHint: TextView
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    /** 系统设置页里授权完毕后没有可靠的 resultCode，直接回 onResume 重新判断 */
+    private val overlayPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { refreshOverlayUi() }
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +62,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         tvStatus = findViewById(R.id.tvStatus)
         btnSpeak = findViewById(R.id.btnSpeak)
         btnStop = findViewById(R.id.btnStop)
+        btnOverlay = findViewById(R.id.btnOverlay)
+        tvOverlayHint = findViewById(R.id.tvOverlayHint)
 
         // 引擎就绪之前先禁用按钮
         btnSpeak.isEnabled = false
@@ -61,9 +86,63 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
         btnSpeak.setOnClickListener { speak() }
         btnStop.setOnClickListener { tts?.stop() }
+        btnOverlay.setOnClickListener { toggleOverlay() }
 
         // 构造 TextToSpeech 是异步的，结果通过 onInit() 回调
         tts = TextToSpeech(this, this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 从悬浮窗权限设置页返回后会走这里
+        refreshOverlayUi()
+    }
+
+    // ------------------------------------------------------------ 悬浮窗开关
+
+    private fun toggleOverlay() {
+        if (OverlayService.isRunning) {
+            stopService(Intent(this, OverlayService::class.java))
+            refreshOverlayUi()
+            return
+        }
+
+        // 悬浮窗是特殊权限，只能由用户在系统设置里亲自授予
+        if (!Settings.canDrawOverlays(this)) {
+            overlayPermissionLauncher.launch(
+                Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+            )
+            return
+        }
+
+        requestNotificationPermissionIfNeeded()
+        ContextCompat.startForegroundService(this, Intent(this, OverlayService::class.java))
+
+        // 服务的 onStartCommand 是稍后在主线程执行的，等它把 isRunning 置位后再刷新文案
+        mainHandler.postDelayed({ refreshOverlayUi() }, 300L)
+    }
+
+    private fun refreshOverlayUi() {
+        val running = OverlayService.isRunning
+        btnOverlay.setText(if (running) R.string.overlay_stop else R.string.overlay_start)
+        tvOverlayHint.text = when {
+            running -> getString(R.string.overlay_running_hint)
+            !Settings.canDrawOverlays(this) -> getString(R.string.overlay_permission_hint)
+            else -> getString(R.string.overlay_idle_hint)
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        // Android 13 起没有通知权限的话，前台服务的常驻通知不会显示
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     /** 引擎初始化完成的回调 */

@@ -12,6 +12,16 @@
         </intent>
     </queries>
 
+    <!-- 悬浮窗：特殊权限，必须由用户在系统设置里手动授予，无法弹窗申请 -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- 前台服务：后台常驻画悬浮窗所需 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!-- Android 13+ 展示前台服务的常驻通知所需 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -27,6 +37,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+          foregroundServiceType="specialUse" 是 Android 14+ 的强制要求，它不属于
+          系统预置的几类用途。属性说明写在 <property> 里，供上架审核时解释用途。
+        -->
+        <service
+            android:name=".OverlayService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="floating_button_tts_playback" />
+        </service>
     </application>
 
 </manifest>

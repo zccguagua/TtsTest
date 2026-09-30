@@ -17,4 +17,21 @@
     <string name="status_init_failed">语音引擎初始化失败，请检查系统是否已安装 TTS 引擎</string>
 
     <string name="toast_empty">请先输入要朗读的文字</string>
+
+    <!-- 悬浮窗朗读 -->
+    <string name="overlay_button_desc">朗读剪贴板</string>
+    <string name="overlay_section_title">后台悬浮窗</string>
+    <string name="overlay_start">开启悬浮窗朗读</string>
+    <string name="overlay_stop">关闭悬浮窗朗读</string>
+    <string name="overlay_idle_hint">开启后屏幕上会出现一个圆形按钮（可拖动）：先在其他应用里复制文字，再点它就会朗读剪贴板内容。</string>
+    <string name="overlay_running_hint">悬浮窗已开启。在其他应用复制文字后点击它即可朗读，拖动可改变位置。</string>
+    <string name="overlay_permission_hint">还缺「显示在其他应用上层」权限，点按钮前往系统设置授权。</string>
+    <string name="overlay_permission_missing">缺少悬浮窗权限，无法显示悬浮按钮</string>
+    <string name="overlay_clipboard_empty">剪贴板里没有文字</string>
+    <string name="overlay_focus_failed">没能拿到窗口焦点，读不到剪贴板，请再点一次试试</string>
+
+    <string name="notif_channel_name">悬浮窗朗读</string>
+    <string name="notif_channel_desc">保持悬浮按钮在后台可用</string>
+    <string name="notif_title">悬浮窗朗读已开启</string>
+    <string name="notif_text">点击悬浮按钮朗读剪贴板文字</string>
 </resources>
