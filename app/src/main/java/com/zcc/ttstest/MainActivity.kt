@@ -1,8 +1,10 @@
 package com.zcc.ttstest
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -11,6 +13,8 @@ import android.os.Looper
 import android.provider.Settings
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.SeekBar
@@ -39,6 +43,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var btnSpeak: Button
     private lateinit var btnStop: Button
     private lateinit var btnOverlay: Button
+    private lateinit var btnOcr: Button
     private lateinit var tvOverlayHint: TextView
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -63,6 +68,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         btnSpeak = findViewById(R.id.btnSpeak)
         btnStop = findViewById(R.id.btnStop)
         btnOverlay = findViewById(R.id.btnOverlay)
+        btnOcr = findViewById(R.id.btnOcr)
         tvOverlayHint = findViewById(R.id.tvOverlayHint)
 
         // 引擎就绪之前先禁用按钮
@@ -87,9 +93,27 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         btnSpeak.setOnClickListener { speak() }
         btnStop.setOnClickListener { tts?.stop() }
         btnOverlay.setOnClickListener { toggleOverlay() }
+        btnOcr.setOnClickListener { startActivity(Intent(this, PhotoOcrActivity::class.java)) }
 
         // 构造 TextToSpeech 是异步的，结果通过 onInit() 回调
         tts = TextToSpeech(this, this)
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        // 点击输入框以外的区域时收起软键盘
+        if (ev.action == MotionEvent.ACTION_DOWN) {
+            val focused = currentFocus
+            if (focused is EditText) {
+                val rect = Rect()
+                focused.getGlobalVisibleRect(rect)
+                if (!rect.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
+                    focused.clearFocus()
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(focused.windowToken, 0)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     override fun onResume() {

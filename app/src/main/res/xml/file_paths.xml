@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- 相机拍的照片临时放在 cache/ocr 下，通过 FileProvider 提供 content URI -->
+    <cache-path
+        name="ocr"
+        path="ocr/" />
+</paths>

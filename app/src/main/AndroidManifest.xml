@@ -22,6 +22,9 @@
     <!-- Android 13+ 展示前台服务的常驻通知所需 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- 拍照识别：调用相机拍照所需 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -38,6 +41,11 @@
             </intent-filter>
         </activity>
 
+        <!-- 拍照识别：拍照/相册选图 + OCR -->
+        <activity
+            android:name=".PhotoOcrActivity"
+            android:exported="false" />
+
         <!--
           foregroundServiceType="specialUse" 是 Android 14+ 的强制要求，它不属于
           系统预置的几类用途。属性说明写在 <property> 里，供上架审核时解释用途。
@@ -50,6 +58,17 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="floating_button_tts_playback" />
         </service>
+
+        <!-- 拍照识别：相机拍的照片需要通过 FileProvider 提供 content URI -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>
