@@ -17,6 +17,10 @@ local.properties
 .DS_Store
 /captures
 
+# 本地工作文件（不入库）
+/HANDOFF.md
+/_download.py
+
 # 语音识别模型（体积过大，超出 GitHub 单文件 100MB 限制，需本地下载后放入）
 /app/src/main/assets/
 
