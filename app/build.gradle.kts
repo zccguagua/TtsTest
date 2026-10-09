@@ -42,6 +42,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.mlkit.text.recognition.chinese)
+    // sherpa-onnx 离线语音识别（本地 AAR，避免 JitPack 拉取失败）
+    implementation(files("libs/sherpa-onnx-1.13.8.aar"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -36,6 +36,26 @@
     <string name="ocr_nothing_to_copy">暂无可复制的文字</string>
     <string name="ocr_camera_denied">需要相机权限才能拍照</string>
 
+    <!-- 语音识别 -->
+    <string name="btn_speech">语音识别</string>
+    <string name="speech_title">语音识别</string>
+    <string name="speech_init_loading">正在加载识别模型…</string>
+    <string name="speech_ready">就绪，按住下方按钮说话</string>
+    <string name="speech_listening">正在聆听…</string>
+    <string name="speech_decoding">正在识别…</string>
+    <string name="speech_init_failed">识别模型加载失败</string>
+    <string name="speech_hold_hint">按住说话</string>
+    <string name="speech_result_label">识别结果</string>
+    <string name="speech_result_empty">（暂无）</string>
+    <string name="speech_empty_result">未识别到内容</string>
+    <string name="speech_no_audio">没有录到声音</string>
+    <string name="speech_decode_failed">识别失败，请重试</string>
+    <string name="speech_history_title">历史记录</string>
+    <string name="speech_history_empty">暂无识别记录</string>
+    <string name="speech_clear_history">清空</string>
+    <string name="speech_permission_denied">需要麦克风权限才能录音</string>
+    <string name="speech_permission_granted">已授权，请按住说话</string>
+
     <!-- 悬浮窗朗读 -->
     <string name="overlay_button_desc">朗读剪贴板</string>
     <string name="overlay_section_title">后台悬浮窗</string>
@@ -52,4 +72,23 @@
     <string name="notif_channel_desc">保持悬浮按钮在后台可用</string>
     <string name="notif_title">悬浮窗朗读已开启</string>
     <string name="notif_text">点击悬浮按钮朗读剪贴板文字</string>
+
+    <!-- 底部导航 -->
+    <string name="nav_tts">朗读</string>
+    <string name="nav_ocr">拍照识别</string>
+    <string name="nav_speech">语音识别</string>
+    <string name="nav_phrases">常用语</string>
+
+    <!-- 常用语 -->
+    <string name="phrases_title">常用语</string>
+    <string name="phrases_add">新增</string>
+    <string name="phrases_empty">暂无常用语，点右上角「新增」添加</string>
+    <string name="phrases_add_title">新增常用语</string>
+    <string name="phrases_add_hint">输入常用语内容</string>
+    <string name="phrases_confirm">确定</string>
+    <string name="phrases_cancel">取消</string>
+    <string name="phrases_tts_not_ready">语音引擎未就绪</string>
+    <string name="phrases_deleted">已删除</string>
+    <string name="phrases_delete">删除</string>
+    <string name="phrases_speak_desc">朗读</string>
 </resources>

@@ -25,6 +25,9 @@
     <!-- 拍照识别：调用相机拍照所需 -->
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- 语音识别：录音所需 -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -40,11 +43,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- 拍照识别：拍照/相册选图 + OCR -->
-        <activity
-            android:name=".PhotoOcrActivity"
-            android:exported="false" />
 
         <!--
           foregroundServiceType="specialUse" 是 Android 14+ 的强制要求，它不属于

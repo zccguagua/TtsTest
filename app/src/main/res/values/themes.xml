@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 使用 Material 3 主题，无自带的 ActionBar（标题由布局自己画） -->
-    <style name="Theme.TtsTest" parent="Theme.Material3.DayNight.NoActionBar" />
+    <!-- 微信风格：略暗的白背景 + 黑色文字 + 微信绿按钮 -->
+    <style name="Theme.TtsTest" parent="Theme.Material3.Light.NoActionBar">
+        <!-- 按钮 / 强调色：微信绿 -->
+        <item name="colorPrimary">@color/wechat_green</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- 背景：略暗的白 -->
+        <item name="colorSurface">@color/app_background</item>
+        <item name="colorOnSurface">@color/text_black</item>
+        <item name="android:colorBackground">@color/app_background</item>
+        <item name="android:windowBackground">@color/app_background</item>
+
+        <!-- 文字：黑色 -->
+        <item name="android:textColorPrimary">@color/text_black</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+
+        <!-- 底部导航未选中项颜色 -->
+        <item name="colorOnSurfaceVariant">@color/unselected_gray</item>
+    </style>
 </resources>

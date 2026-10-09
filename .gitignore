@@ -16,3 +16,10 @@ local.properties
 # 其他
 .DS_Store
 /captures
+
+# 语音识别模型（体积过大，超出 GitHub 单文件 100MB 限制，需本地下载后放入）
+/app/src/main/assets/
+
+# 模型原始下载包 / 备份
+/sense-voice.tar.bz2
+/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17/

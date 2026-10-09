@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 微信绿 -->
+    <color name="wechat_green">#07C160</color>
+    <color name="white">#FFFFFF</color>
+    <!-- 略暗的白背景 -->
+    <color name="app_background">#F5F5F5</color>
+    <color name="text_black">#000000</color>
+    <color name="text_secondary">#666666</color>
+    <color name="unselected_gray">#8A8A8A</color>
+</resources>
