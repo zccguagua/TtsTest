@@ -192,11 +192,18 @@ class PhrasesFragment : Fragment(), TextToSpeech.OnInitListener {
         const val KEY_PHRASES = "phrases"
 
         val DEFAULT_PHRASES = listOf(
-            "你好，请问有什么可以帮您？",
+            "你好",
             "谢谢",
-            "请问洗手间在哪里？",
             "麻烦再说一遍",
             "好的，没问题",
+            "别客气",
+            "注意安全",
+            "天气怎么样",
+            "我爱你",
+            "早上好！",
+            "中午好！",
+            "晚上好！",
+            "你弄啥捏",
         )
     }
 }
