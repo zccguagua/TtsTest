@@ -91,4 +91,5 @@
     <string name="phrases_deleted">已删除</string>
     <string name="phrases_delete">删除</string>
     <string name="phrases_speak_desc">朗读</string>
+    <string name="phrases_drag_desc">长按拖拽排序</string>
 </resources>

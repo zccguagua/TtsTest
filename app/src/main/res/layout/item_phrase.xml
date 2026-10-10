@@ -45,5 +45,16 @@
             android:layout_weight="1"
             android:textSize="18sp" />
 
+        <!-- 拖拽手柄：提示该行可上下拖拽排序 -->
+        <ImageView
+            android:id="@+id/ivDragHandle"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            android:alpha="0.5"
+            android:contentDescription="@string/phrases_drag_desc"
+            android:src="@drawable/ic_drag_handle"
+            app:tint="?android:attr/textColorSecondary" />
+
     </LinearLayout>
 </FrameLayout>
