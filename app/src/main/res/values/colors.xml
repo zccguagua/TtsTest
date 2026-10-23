@@ -2,6 +2,8 @@
 <resources>
     <!-- 微信绿 -->
     <color name="wechat_green">#07C160</color>
+    <!-- 微信「自己发出的消息」气泡绿 -->
+    <color name="wechat_bubble">#95EC69</color>
     <color name="white">#FFFFFF</color>
     <!-- 略暗的白背景 -->
     <color name="app_background">#F5F5F5</color>

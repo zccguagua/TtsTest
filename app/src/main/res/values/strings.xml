@@ -45,6 +45,8 @@
     <string name="speech_decoding">正在识别…</string>
     <string name="speech_init_failed">识别模型加载失败</string>
     <string name="speech_hold_hint">按住说话</string>
+    <string name="speech_release_hint">松开结束</string>
+    <string name="speech_play_bubble">朗读这条记录</string>
     <string name="speech_result_label">识别结果</string>
     <string name="speech_result_empty">（暂无）</string>
     <string name="speech_empty_result">未识别到内容</string>
