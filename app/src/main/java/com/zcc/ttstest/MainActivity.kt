@@ -39,6 +39,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // 共享 TTS 引擎跟随 Activity 生命周期释放
+        TtsManager.shutdown()
+    }
+
     private fun selectTab(tag: String) {
         val fm = supportFragmentManager
         val tx = fm.beginTransaction()

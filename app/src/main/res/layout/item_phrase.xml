@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_weight="1"
-            android:textSize="18sp" />
+            android:textSize="20sp" />
 
         <!-- 拖拽手柄：提示该行可上下拖拽排序 -->
         <ImageView

@@ -10,4 +10,7 @@
     <color name="text_black">#000000</color>
     <color name="text_secondary">#666666</color>
     <color name="unselected_gray">#8A8A8A</color>
+    <color name="stop_yellow">#FFC107</color>
+    <!-- 按住说话时按钮的淡蓝背景 -->
+    <color name="hold_pressed_blue">#81D4FA</color>
 </resources>

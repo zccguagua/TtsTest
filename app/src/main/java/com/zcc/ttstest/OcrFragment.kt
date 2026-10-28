@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
-import android.speech.tts.TextToSpeech
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -26,13 +25,12 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
 import java.io.File
-import java.util.Locale
 
 /**
  * 拍照识别：拍照或从相册选图，用 ML Kit 离线识别中文文字，
  * 识别结果可编辑、可复制、可直接朗读。
  */
-class OcrFragment : Fragment(), TextToSpeech.OnInitListener {
+class OcrFragment : Fragment() {
 
     private lateinit var ivPreview: ImageView
     private lateinit var etResult: EditText
@@ -40,9 +38,6 @@ class OcrFragment : Fragment(), TextToSpeech.OnInitListener {
     private lateinit var btnGallery: Button
     private lateinit var btnCopy: Button
     private lateinit var btnSpeak: Button
-
-    private var tts: TextToSpeech? = null
-    private var ready = false
 
     /** 识别结果是否可用（复制/朗读前判断） */
     private var hasResult = false
@@ -118,7 +113,10 @@ class OcrFragment : Fragment(), TextToSpeech.OnInitListener {
             false
         }
 
-        tts = TextToSpeech(requireContext(), this)
+        TtsManager.init(requireContext())
+        TtsManager.registerListener("ocr") { state ->
+            btnSpeak.isEnabled = state == TtsManager.State.READY
+        }
     }
 
     private fun dismissKeyboardOnOutsideTap(ev: MotionEvent) {
@@ -187,36 +185,17 @@ class OcrFragment : Fragment(), TextToSpeech.OnInitListener {
     }
 
     private fun speakResult() {
-        if (!ready) return
+        if (TtsManager.state != TtsManager.State.READY) return
         val text = etResult.text.toString().trim()
         if (!hasResult || text.isEmpty()) {
             toast(getString(R.string.ocr_empty))
             return
         }
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "ocr-${System.currentTimeMillis()}")
-    }
-
-    override fun onInit(status: Int) {
-        if (status != TextToSpeech.SUCCESS) {
-            ready = false
-            return
-        }
-        val result = tts?.setLanguage(Locale.getDefault())
-        if (result == TextToSpeech.LANG_MISSING_DATA ||
-            result == TextToSpeech.LANG_NOT_SUPPORTED
-        ) {
-            ready = false
-            return
-        }
-        tts?.setSpeechRate(1.0f)
-        ready = true
-        btnSpeak.isEnabled = true
+        TtsManager.speak(text, "ocr-${System.currentTimeMillis()}")
     }
 
     override fun onDestroyView() {
-        tts?.stop()
-        tts?.shutdown()
-        tts = null
+        TtsManager.unregisterListener("ocr")
         // 相机照片本就存在 cache 目录（不进相册），退出时删掉更干净
         File(requireContext().cacheDir, "ocr").deleteRecursively()
         super.onDestroyView()

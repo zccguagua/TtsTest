@@ -18,5 +18,12 @@
 
         <!-- 底部导航未选中项颜色 -->
         <item name="colorOnSurfaceVariant">@color/unselected_gray</item>
+
+        <!-- 全局按钮：文字放大一点 -->
+        <item name="materialButtonStyle">@style/Widget.App.Button</item>
+    </style>
+
+    <style name="Widget.App.Button" parent="Widget.Material3.Button">
+        <item name="android:textSize">18sp</item>
     </style>
 </resources>

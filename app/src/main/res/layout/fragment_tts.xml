@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ttsRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -77,7 +78,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/btn_speak" />
+                android:text="@string/btn_speak"
+                app:icon="@drawable/ic_play"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:iconTint="?attr/colorOnPrimary" />
 
             <Button
                 android:id="@+id/btnStop"
@@ -85,7 +90,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_weight="1"
-                android:text="@string/btn_stop" />
+                android:text="@string/btn_stop"
+                app:backgroundTint="@color/stop_yellow"
+                app:icon="@drawable/ic_stop"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:iconTint="?attr/colorOnPrimary" />
         </LinearLayout>
 
         <TextView
@@ -107,7 +117,11 @@
             android:id="@+id/btnOverlay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            app:icon="@drawable/ic_book"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconTint="?attr/colorOnPrimary" />
 
     </LinearLayout>
 </ScrollView>

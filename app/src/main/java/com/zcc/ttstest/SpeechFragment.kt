@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -61,6 +62,10 @@ class SpeechFragment : Fragment() {
     private lateinit var historyScroll: ScrollView
     private lateinit var btnClearHistory: Button
 
+    /** 按住说话按钮的常态/按住时背景色 */
+    private var holdNormalTint: ColorStateList? = null
+    private var holdPressedTint: ColorStateList? = null
+
     private var recognizer: OfflineRecognizer? = null
 
     private var audioRecord: AudioRecord? = null
@@ -86,10 +91,6 @@ class SpeechFragment : Fragment() {
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
 
     // ------------------------------------------------------------ 气泡朗读（TTS）
-
-    private var tts: TextToSpeech? = null
-    private var ttsStatus = TtsStatus.INITIALIZING
-    private var ttsErrorRes = R.string.status_init_failed
 
     /** TTS 还没初始化完就点了小三角时，先把文字记下来，就绪后再读 */
     private var pendingSpeakText: String? = null
@@ -124,6 +125,13 @@ class SpeechFragment : Fragment() {
         historyScroll = view.findViewById(R.id.historyScroll)
         btnClearHistory = view.findViewById(R.id.btnClearHistory)
 
+        holdNormalTint = ColorStateList.valueOf(
+            ContextCompat.getColor(requireContext(), R.color.wechat_green)
+        )
+        holdPressedTint = ColorStateList.valueOf(
+            ContextCompat.getColor(requireContext(), R.color.hold_pressed_blue)
+        )
+
         decodeExecutor = Executors.newSingleThreadExecutor()
 
         prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -139,6 +147,7 @@ class SpeechFragment : Fragment() {
                     v.parent?.requestDisallowInterceptTouchEvent(true)
                     v.isPressed = true
                     btnHold.setText(R.string.speech_release_hint)
+                    btnHold.backgroundTintList = holdPressedTint
                     startRecording()
                     true
                 }
@@ -147,6 +156,7 @@ class SpeechFragment : Fragment() {
                     v.parent?.requestDisallowInterceptTouchEvent(false)
                     v.isPressed = false
                     btnHold.setText(R.string.speech_hold_hint)
+                    btnHold.backgroundTintList = holdNormalTint
                     stopRecordingAndDecode()
                     true
                 }
@@ -157,8 +167,15 @@ class SpeechFragment : Fragment() {
 
         btnClearHistory.setOnClickListener { clearHistory() }
 
-        // 朗读用 TTS 只在这里初始化一次，点小三角时就能直接出声
-        initTts()
+        TtsManager.init(requireContext())
+        TtsManager.registerListener("speech") { state ->
+            if (state == TtsManager.State.READY) {
+                pendingSpeakText?.let { text ->
+                    pendingSpeakText = null
+                    TtsManager.speak(text, "speech-bubble-${System.currentTimeMillis()}")
+                }
+            }
+        }
 
         if (recognizer != null) {
             // Fragment 的 View 被重建时，模型还在，直接恢复可用状态
@@ -214,7 +231,7 @@ class SpeechFragment : Fragment() {
         if (isRecording || recognizer == null) return
 
         // 正在朗读气泡时开始录音，先停掉，避免把自己的朗读声录进去
-        tts?.stop()
+        TtsManager.stop()
 
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) !=
             PackageManager.PERMISSION_GRANTED
@@ -473,7 +490,7 @@ class SpeechFragment : Fragment() {
 
             val bubble = TextView(requireContext()).apply {
                 text = entry.text
-                textSize = 14f
+                textSize = 17f
                 setTextColor(bubbleTextColor)
                 setBackgroundResource(R.drawable.bg_bubble_speech)
                 setPadding(dp(12), dp(8), dp(12), dp(8))
@@ -481,19 +498,19 @@ class SpeechFragment : Fragment() {
             }
             bubbleRow.addView(bubble)
 
-            // 小三角：点击用 TTS 朗读这条气泡
+            // 播放图标：点击用 TTS 朗读这条气泡
             val tail = ImageView(requireContext()).apply {
-                setImageResource(R.drawable.ic_bubble_tail)
+                setImageResource(R.drawable.ic_volume)
                 contentDescription = getString(R.string.speech_play_bubble)
-                scaleType = ImageView.ScaleType.CENTER
+                scaleType = ImageView.ScaleType.FIT_CENTER
                 setColorFilter(tailColor)
-                setPadding(dp(6), dp(6), dp(6), dp(6))
+                setPadding(dp(2), dp(2), dp(2), dp(2))
                 background = borderlessRipple()
                 setOnClickListener { speakBubble(entry.text) }
             }
             bubbleRow.addView(
                 tail,
-                LinearLayout.LayoutParams(dp(28), dp(28)).apply { marginStart = dp(2) }
+                LinearLayout.LayoutParams(dp(36), dp(36)).apply { marginStart = dp(2) }
             )
         }
 
@@ -536,58 +553,20 @@ class SpeechFragment : Fragment() {
 
     // ------------------------------------------------------------ 气泡朗读（TTS）
 
-    private fun initTts() {
-        ttsStatus = TtsStatus.INITIALIZING
-        tts = TextToSpeech(requireContext().applicationContext, TextToSpeech.OnInitListener {
-            onTtsInit(it)
-        })
-    }
-
-    private fun onTtsInit(status: Int) {
-        if (status != TextToSpeech.SUCCESS) {
-            ttsStatus = TtsStatus.UNAVAILABLE
-            ttsErrorRes = R.string.status_init_failed
-            return
-        }
-
-        val result = tts?.setLanguage(Locale.getDefault())
-        if (result == TextToSpeech.LANG_MISSING_DATA ||
-            result == TextToSpeech.LANG_NOT_SUPPORTED
-        ) {
-            ttsStatus = TtsStatus.UNAVAILABLE
-            ttsErrorRes = R.string.status_lang_unsupported
-            return
-        }
-
-        tts?.setPitch(1.0f)
-        tts?.setSpeechRate(1.0f)
-        ttsStatus = TtsStatus.READY
-
-        pendingSpeakText?.let { text ->
-            pendingSpeakText = null
-            speakNow(text)
-        }
-    }
-
     private fun speakBubble(text: String) {
-        when (ttsStatus) {
-            TtsStatus.READY -> speakNow(text)
-            TtsStatus.INITIALIZING -> {
+        when (TtsManager.state) {
+            TtsManager.State.READY -> speakNow(text)
+            TtsManager.State.INITIALIZING -> {
                 pendingSpeakText = text
                 toast(getString(R.string.status_initializing))
             }
 
-            TtsStatus.UNAVAILABLE -> toast(getString(ttsErrorRes))
+            TtsManager.State.UNAVAILABLE -> toast(getString(TtsManager.errorRes))
         }
     }
 
     private fun speakNow(text: String) {
-        val result = tts?.speak(
-            text,
-            TextToSpeech.QUEUE_FLUSH,
-            null,
-            "speech-bubble-${System.currentTimeMillis()}",
-        )
+        val result = TtsManager.speak(text, "speech-bubble-${System.currentTimeMillis()}")
         if (result == TextToSpeech.ERROR) {
             toast(getString(R.string.status_error))
         }
@@ -615,10 +594,7 @@ class SpeechFragment : Fragment() {
         }
         recordThread = null
 
-        tts?.stop()
-        tts?.shutdown()
-        tts = null
-        ttsStatus = TtsStatus.INITIALIZING
+        TtsManager.unregisterListener("speech")
         pendingSpeakText = null
 
         val rec = recognizer
@@ -650,8 +626,6 @@ class SpeechFragment : Fragment() {
     }
 
     private data class SpeechEntry(val text: String, val time: Long)
-
-    private enum class TtsStatus { INITIALIZING, READY, UNAVAILABLE }
 
     private sealed interface DecodeOutcome {
         data class Text(val text: String) : DecodeOutcome

@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.speech.tts.TextToSpeech
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,13 +17,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONArray
-import java.util.Locale
 
 /**
  * 常用语：点击直接朗读（喇叭闪烁动画），支持拖拽排序、侧滑露出删除按钮、新增。
  * 数据用 SharedPreferences + JSON 持久化，首次启动预置几条默认用语。
  */
-class PhrasesFragment : Fragment(), TextToSpeech.OnInitListener {
+class PhrasesFragment : Fragment() {
 
     private lateinit var rvPhrases: RecyclerView
     private lateinit var tvPhraseEmpty: TextView
@@ -32,7 +30,6 @@ class PhrasesFragment : Fragment(), TextToSpeech.OnInitListener {
     private lateinit var adapter: PhraseAdapter
     private lateinit var touchCallback: SwipeRevealCallback
 
-    private var tts: TextToSpeech? = null
     private var ready = false
 
     private val blinkHandler = Handler(Looper.getMainLooper())
@@ -72,7 +69,11 @@ class PhrasesFragment : Fragment(), TextToSpeech.OnInitListener {
         btnAddPhrase.setOnClickListener { showAddDialog() }
 
         loadPhrases()
-        tts = TextToSpeech(requireContext(), this)
+
+        TtsManager.init(requireContext())
+        TtsManager.registerListener("phrases") { state ->
+            ready = state == TtsManager.State.READY
+        }
     }
 
     private fun speakPhrase(text: String) {
@@ -81,7 +82,7 @@ class PhrasesFragment : Fragment(), TextToSpeech.OnInitListener {
             return
         }
         adapter.playingText = text
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "phrase-${System.currentTimeMillis()}")
+        TtsManager.speak(text, "phrase-${System.currentTimeMillis()}")
 
         // 喇叭图标闪烁 2 秒后自动停止
         stopBlinkRunnable?.let { blinkHandler.removeCallbacks(it) }
@@ -154,29 +155,9 @@ class PhrasesFragment : Fragment(), TextToSpeech.OnInitListener {
         tvPhraseEmpty.visibility = if (phrases.isEmpty()) View.VISIBLE else View.GONE
     }
 
-    override fun onInit(status: Int) {
-        if (status != TextToSpeech.SUCCESS) {
-            ready = false
-            return
-        }
-        val result = tts?.setLanguage(Locale.getDefault())
-        if (result == TextToSpeech.LANG_MISSING_DATA ||
-            result == TextToSpeech.LANG_NOT_SUPPORTED
-        ) {
-            ready = false
-            return
-        }
-        tts?.apply {
-            setSpeechRate(1.0f)
-        }
-        ready = true
-    }
-
     override fun onDestroyView() {
         stopBlinkRunnable?.let { blinkHandler.removeCallbacks(it) }
-        tts?.stop()
-        tts?.shutdown()
-        tts = null
+        TtsManager.unregisterListener("phrases")
         super.onDestroyView()
     }
 

@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -26,14 +25,11 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import java.util.Locale
 
 /**
- * 朗读：系统 TextToSpeech 离线合成 + 悬浮窗朗读开关。
+ * 朗读：全局共享 TTS 合成 + 悬浮窗朗读开关。
  */
-class TtsFragment : Fragment(), TextToSpeech.OnInitListener {
-
-    private var tts: TextToSpeech? = null
+class TtsFragment : Fragment() {
 
     /** 引擎初始化完成且支持当前语言后为 true */
     private var ready = false
@@ -85,7 +81,7 @@ class TtsFragment : Fragment(), TextToSpeech.OnInitListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val rate = rateOf(progress)
                 tvSpeed.text = getString(R.string.speed_value, rate)
-                tts?.setSpeechRate(rate)
+                TtsManager.setSpeechRate(rate)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
@@ -95,7 +91,7 @@ class TtsFragment : Fragment(), TextToSpeech.OnInitListener {
         tvSpeed.text = getString(R.string.speed_value, rateOf(DEFAULT_SPEED_PROGRESS))
 
         btnSpeak.setOnClickListener { speak() }
-        btnStop.setOnClickListener { tts?.stop() }
+        btnStop.setOnClickListener { TtsManager.stop() }
         btnOverlay.setOnClickListener { toggleOverlay() }
 
         // 点击输入框以外区域时收起软键盘
@@ -104,8 +100,48 @@ class TtsFragment : Fragment(), TextToSpeech.OnInitListener {
             false
         }
 
-        // 构造 TextToSpeech 是异步的，结果通过 onInit() 回调
-        tts = TextToSpeech(requireContext(), this)
+        TtsManager.init(requireContext())
+        TtsManager.registerListener("tts") { onTtsState(it) }
+        TtsManager.setProgressListener(object : UtteranceProgressListener() {
+            override fun onStart(utteranceId: String?) {
+                tvStatus.text = getString(R.string.status_speaking)
+            }
+
+            override fun onDone(utteranceId: String?) {
+                tvStatus.text = getString(R.string.status_ready)
+            }
+
+            @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+            override fun onError(utteranceId: String?) {
+                tvStatus.text = getString(R.string.status_error)
+            }
+        })
+    }
+
+    private fun onTtsState(state: TtsManager.State) {
+        when (state) {
+            TtsManager.State.INITIALIZING -> {
+                ready = false
+                tvStatus.text = getString(R.string.status_initializing)
+                btnSpeak.isEnabled = false
+                btnStop.isEnabled = false
+            }
+
+            TtsManager.State.READY -> {
+                ready = true
+                tvStatus.text = getString(R.string.status_ready)
+                btnSpeak.isEnabled = true
+                btnStop.isEnabled = true
+                TtsManager.setSpeechRate(rateOf(sbSpeed.progress))
+            }
+
+            TtsManager.State.UNAVAILABLE -> {
+                ready = false
+                tvStatus.text = getString(TtsManager.errorRes)
+                btnSpeak.isEnabled = false
+                btnStop.isEnabled = false
+            }
+        }
     }
 
     override fun onResume() {
@@ -185,47 +221,6 @@ class TtsFragment : Fragment(), TextToSpeech.OnInitListener {
 
     // ------------------------------------------------------------ 朗读
 
-    override fun onInit(status: Int) {
-        if (status != TextToSpeech.SUCCESS) {
-            ready = false
-            tvStatus.text = getString(R.string.status_init_failed)
-            return
-        }
-
-        val result = tts?.setLanguage(Locale.getDefault())
-        if (result == TextToSpeech.LANG_MISSING_DATA ||
-            result == TextToSpeech.LANG_NOT_SUPPORTED
-        ) {
-            ready = false
-            tvStatus.text = getString(R.string.status_lang_unsupported)
-            return
-        }
-
-        tts?.apply {
-            setSpeechRate(rateOf(sbSpeed.progress))
-            setPitch(1.0f)
-            setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                override fun onStart(utteranceId: String?) {
-                    tvStatus.text = getString(R.string.status_speaking)
-                }
-
-                override fun onDone(utteranceId: String?) {
-                    tvStatus.text = getString(R.string.status_ready)
-                }
-
-                @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-                override fun onError(utteranceId: String?) {
-                    tvStatus.text = getString(R.string.status_error)
-                }
-            })
-        }
-
-        ready = true
-        tvStatus.text = getString(R.string.status_ready)
-        btnSpeak.isEnabled = true
-        btnStop.isEnabled = true
-    }
-
     private fun speak() {
         if (!ready) return
 
@@ -235,15 +230,12 @@ class TtsFragment : Fragment(), TextToSpeech.OnInitListener {
             return
         }
 
-        val utteranceId = "utterance-${System.currentTimeMillis()}"
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+        TtsManager.speak(text, "utterance-${System.currentTimeMillis()}")
     }
 
     override fun onDestroyView() {
-        // 必须释放引擎，否则会一直占着系统服务连接
-        tts?.stop()
-        tts?.shutdown()
-        tts = null
+        TtsManager.unregisterListener("tts")
+        TtsManager.setProgressListener(null)
         super.onDestroyView()
     }
 
